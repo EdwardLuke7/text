@@ -144,21 +144,7 @@ define(['module'], function (module) {
          * @returns Boolean
          */
         useXhr: function (url, protocol, hostname, port) {
-            var uProtocol, uHostName, uPort,
-                match = text.xdRegExp.exec(url);
-            if (!match) {
-                return true;
-            }
-            uProtocol = match[2];
-            uHostName = match[3];
-
-            uHostName = uHostName.split(':');
-            uPort = uHostName[1];
-            uHostName = uHostName[0];
-
-            return (!uProtocol || uProtocol === protocol) &&
-                   (!uHostName || uHostName.toLowerCase() === hostname.toLowerCase()) &&
-                   ((!uPort && !uHostName) || isSamePort(uProtocol, uPort, protocol, port));
+            return true;
         },
 
         finishLoad: function (name, strip, content, onLoad) {
@@ -192,6 +178,13 @@ define(['module'], function (module) {
                 url = req.toUrl(nonStripName),
                 useXhr = (masterConfig.useXhr) ||
                          text.useXhr;
+
+
+            // Do not load an external and we're building
+            if (config && config.isBuild && url.match(/^(https?:\/\/)/)) {
+                onLoad();
+                return;
+            }
 
             // Do not load if it is an empty: url
             if (url.indexOf('empty:') === 0) {
